@@ -1,0 +1,297 @@
+<!-- Romantic Surprise Webpage: Confetti + Hearts + Typewriter + Quiz + Pattu Mode -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Birthday Surprise 💖</title>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #ffdde6;
+      font-family: 'Poppins', sans-serif;
+      overflow-x: hidden;
+      text-align: center;
+    }
+
+    .screen { display: none; padding: 50px 20px; }
+    .active { display: block; }
+
+    button {
+      padding: 12px 25px;
+      border: none;
+      background: #ff3e84;
+      color: #fff;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 18px;
+      margin: 8px;
+    }
+
+    .heart-bg {
+      animation: floatHearts 4s infinite linear;
+      font-size: 28px;
+    }
+
+    @keyframes floatHearts {
+      0% { transform: translateY(20px); }
+      100% { transform: translateY(-40px); opacity: 0; }
+    }
+
+    /* Typewriter */
+    .typewriter {
+      width: 100%;
+      margin-top: 20px;
+      font-size: 22px;
+      white-space: nowrap;
+      overflow: hidden;
+      border-right: 3px solid #ff3e84;
+      animation: typing 4s steps(40, end), blink .5s infinite;
+    }
+
+    @keyframes typing {
+      from { width: 0; }
+    }
+    @keyframes blink {
+      50% { border-color: transparent; }
+    }
+
+    /* Pattu Mode */
+    .pattu-face { font-size: 60px; }
+
+    /* Answers box styling */
+    #answers { margin-top: 16px; display:flex; flex-direction:column; align-items:center; }
+    #answers button { width: 60%; max-width: 320px; }
+
+    /* small result text style */
+    #resultText { font-size: 20px; margin-bottom: 12px; }
+  </style>
+</head>
+<body>
+
+<!-- Intro Screen -->
+<div id="intro" class="screen active">
+  <h2>💕 A Special Surprise Awaits 💕</h2>
+  <div class="heart-bg">💖💗💞</div>
+  <button onclick="go('quiz')">✨ Start ✨</button>
+</div>
+
+<!-- Quiz Screen -->
+<div id="quiz" class="screen">
+  <h2>How Well Do You Know Me? 😏</h2>
+  <p id="questionText"></p>
+  <div id="answers"></div>
+  <div style="margin-top:18px"><small id="progress"></small></div>
+</div>
+
+<!-- Result Screen -->
+<div id="result" class="screen">
+  <h2 id="resultText"></h2>
+  <button onclick="go('love')">Next 💖</button>
+</div>
+
+<!-- Love Message Screen -->
+<div id="love" class="screen">
+  <h2 class="typewriter">You are my forever person 💗</h2>
+  <button onclick="go('pattu')">Pattu Mode 😝</button>
+</div>
+
+<!-- Pattu Mode Screen -->
+<div id="pattu" class="screen">
+  <div class="pattu-face" id="face">😡</div>
+  <button onclick="togglePattu()">Toggle Mood 💞</button>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
+<script>
+  emailjs.init("kXdBYIV_QfNsLg20A"); // Replace with your Public Key
+</script>
+
+<script>
+  // Questions and options (50 questions)
+  const questions = [
+    "Who says sorry first?",
+    "My favorite color?",
+    "What do I do when I get angry?",
+    "My comfort food?",
+    "The first thing I do in the morning?",
+    "What makes me smile instantly?",
+    "My favorite song type?",
+    "What nickname do I love from you?",
+    "When do I miss you the most?",
+    "What calms me?",
+    "Who gets jealous easily?",
+    "What is my secret talent?",
+    "What is my favorite weather?",
+    "Where do I love being touched? (Innocent 😝)",
+    "What do I never say but feel?",
+    "What food do I always crave?",
+    "What is my dream holiday place?",
+    "What annoys me the most?",
+    "What is my love language?",
+    "What emoji represents me?",
+    "Who plans surprise more?",
+    "What do I say when I'm super happy?",
+    "What do I say when I'm annoyed?",
+    "Which side do I sleep on?",
+    "What is my pet name for you?",
+    "Who starts fights?",
+    "How long can I stay angry?",
+    "What name do I blush at?",
+    "Who is more dramatic?",
+    "What is my stress relief thing?",
+    "What do I do when I miss you?",
+    "What fear do I secretly have?",
+    "What dessert do I love?",
+    "What do I dream about us?",
+    "Where do I like to go with you?",
+    "What’s my favorite romantic moment?",
+    "What color suits you on me?",
+    "What makes me feel safe?",
+    "What do I call you when I am soft?",
+    "My future dream with you?",
+    "What makes me shy instantly?",
+    "What word melts me?",
+    "What do I hate hearing?",
+    "What gesture I love?",
+    "What thing of yours I love most?",
+    "What do I say before sleep?",
+    "What do I imagine our future home like?",
+    "Who loves more?",
+"    what did you choose?",    "How much do I love you? ❤️"
+  ];
+
+  const options = [
+    ["You 😘", "Me 😒"],
+    ["Pink", "Black"],
+    ["Silent 🤐", "Shout 😤"],
+    ["Chocolate 🍫", "Biriyani 🍛"],
+    ["Check phone 📱", "Smile 😌"],
+    ["Your smile 😊", "your innocent 😝"],
+    ["Romantic", "Rock"],
+    ["Browniee 🍮", "Pondatti 🐥"],
+    ["Night 🌙", "Morning ☀️"],
+    ["Hug 🤗", "Silence 😶"],
+    ["Me 😏", "You 🤭"],
+    ["Singing 🎤", "Dancing 💃"],
+    ["Rain 🌧️", "Winter ❄️"],
+    ["Forehead 😌", "Hand 😝"],
+    ["I love you", "I miss you"],
+    ["Biryani 🍛", "Maggie 🍜"],
+    ["Goa 🏖️", "Varkala 🏖️"],
+    ["Slow reply 😒", "Ignoring me 🙄"],
+    ["Hugs 🤗", "eye to eye 👁️"],
+    ["🖤✨", "❤️"],
+    ["Me 😎", "You 🎀"],
+    ["Ehehe 😁", "Aww 😍"],
+    ["Hmm 😐", "Okay 👌"],
+    ["Right 🤍", "Left 💙"],
+    ["Pattu", "Baby"],
+    ["Me 😤", "You 🙄"],
+    ["30 seconds", "Forever 😑"],
+    ["Pattu", "Baby"],
+    ["Me 🎭", "You 😂"],
+    ["Music 🎧", "Sleep 😴"],
+    ["Listen to songs 🎶", "Stare at phone 📱"],
+    ["Losing you 😔", "Cockroach 🪳"],
+    ["Ice-cream 🍨", "Cake 🎂"],
+    ["Future 🏠", "Wedding 💍"],
+    ["Cafe ☕", "Beach 🌊"],
+    ["Holding hands 🤝", "Tight Hugs 💞"],
+    ["Pink", "White"],
+    ["Your arms 🤗", "Your voice 🎤"],
+    ["Baby", "Pattu"],
+    ["Travel ✈️", "Home moments 🏡"],
+    ["Hug 🤗", "Kiss 😘"],
+    ["I love you", "Come here 😳"],
+    ["Don't go 😢", "Why like this 😐"],
+    ["Cuddles 🤗", "Forehead kisses 💋"],
+    ["Smile 😍", "Eyes 👀"],
+    ["Goodnight 🌙", "Miss you 😴"],
+    ["Modern & cute 🏡", "Modern & luxury 🏙️"],
+    ["You", "Me 😌"],["Hug me tight","Kiss me slow"],
+    ["More than stars ⭐", "Infinite ♾️"],
+  ];
+
+  let currentQ = 0;
+  let userAnswers = []; // store selected answers
+// each entry = correct option index (0 or 1)
+
+
+
+  function loadQuestion() {
+    let answerKey = [
+  1, // "Who says sorry first?" → correct = option[0] ("You 😘")
+  0, // "My favorite color?" → Pink
+  0, // "Silent 🤐"
+  1,
+    0,
+    1,
+    0,1,0,0,1,1,1,0,0,0,1,1,1,0,1,0,0,0,0,0,0,0,1,1,1,0,0,1,1,1,0,0,1,0,1,1,1,0,0,0,0,1,1,1
+];
+    document.getElementById("questionText").textContent = questions[currentQ];
+    const ansBox = document.getElementById("answers");
+    ansBox.innerHTML = "";
+
+    options[currentQ].forEach((opt, i) => {
+      const btn = document.createElement("button");
+      btn.textContent = opt;
+     btn.onclick = () => {
+  userAnswers.push({
+    question: questions[currentQ],
+    selected: opt,
+    correct: (i === answerKey[currentQ]) // true / false
+  });
+
+  currentQ++;
+  if (currentQ < questions.length) loadQuestion();
+  else finishQuiz('done');
+};
+  ansBox.appendChild(btn);
+    });
+
+    // update progress text
+    const progress = document.getElementById('progress');
+    if (progress) progress.textContent = `Question ${currentQ + 1} / ${questions.length}`;
+  }
+
+  function go(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    if (id === 'quiz') loadQuestion();
+  }
+
+function finishQuiz() {
+  const score = userAnswers.filter(a => a.correct).length + "/" + userAnswers.length;
+
+  document.getElementById('resultText').innerText =
+    `You scored ${score} ❤️`;
+
+  const templateParams = {
+    boy_name: "My Love ❤️",
+    quiz_score: score,
+    quiz_answers: userAnswers.map(a => 
+      `Q: ${a.question}\nYou said: ${a.selected}\nCorrect: ${a.correct ? "✅" : "❌"}`
+    ).join("\n\n"),
+    message: "Hehe now you know how much you know me 🤭💗",
+    from_name: "Your Pattu 💞",
+    email:"t.priyatharshini123@gmail.com"
+  };
+
+  emailjs.send("service_z3i68xs", "template_bi6knqr", templateParams)
+    .then(() => go('result'))
+    .catch(err => alert("Couldn't send 😢"));
+}
+
+  function togglePattu() {
+    let face = document.getElementById("face");
+    face.textContent = face.textContent === "😡" ? "🥺💖" : "😡";
+  }
+</script>
+
+</body>
+</html>
