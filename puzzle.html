@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Puzzle Surprise 💝</title>
+
+<style>
+body {
+  text-align: center;
+  background: #ffeaf8;
+  font-family: "Poppins", Arial;
+}
+#puzzle {
+  display: grid;
+  grid-template-columns: repeat(3,100px);
+  gap: 3px;
+  margin: 20px auto;
+}
+.tile {
+  width: 100px;
+  height: 100px;
+  background-size: 300px 300px;
+  cursor: pointer;
+  border-radius: 6px;
+  border: 2px solid #ddd;
+}
+#message, #final {
+  font-size: 18px;
+  margin-top: 12px;
+  font-weight: bold;
+}
+button {
+  padding: 10px 18px;
+  font-size: 16px;
+  border: none;
+  background: #e91e63;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+button:hover {
+  background: #b7174d;
+}
+.timer {
+  font-size: 22px;
+  color: #d00070;
+  font-weight: 600;
+  margin-top: 5px;
+}
+</style>
+</head>
+<body>
+
+<h2>Solve the Puzzle 🧩💕</h2>
+<p>Tap two tiles to swap them</p>
+<div class="timer">Time Left: <span id="time">60</span>s</div>
+
+<div style="justify-content: center;" id="puzzle"></div>
+<div id="message">Keep going! 💪</div>
+
+<div id="final" style="display:none">
+  🎉 Surprise Unlocked! 🎉 <br><br>
+  <span id="secret">YOU DID IT!! 💖</span><br><br>
+  <button onclick="location.reload()">Play Again</button>
+</div>
+
+<!-- Background soft romantic music -->
+<audio id="bg" src="https://cdn.pixabay.com/audio/2022/03/15/audio_96b38ba986.mp3" loop></audio>
+
+<!-- Sparkle magic sound -->
+<audio id="magic" src="https://cdn.pixabay.com/audio/2022/03/16/audio_b697e0b754.mp3"></audio>
+
+<!-- ✨ EmailJS Script -->
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+<script>
+emailjs.init("kXdBYIV_QfNsLg20A");  // ✅ your EmailJS Public key
+</script>
+
+<script>
+emailjs.init("kXdBYIV_QfNsLg20A"); 
+
+// ✅ Your images list (add your own file names)
+const images = [
+  "./assets/photo1.jpg",
+  "./assets/photo2.jpg",
+  "./assets/photo3.jpg",
+  "./assets/photo4.jpg",
+  "./assets/photo6.jpg",
+  "./assets/photo7.jpg",
+  "./assets/photo8.jpg",
+  "./assets/photo9.jpg",
+  "./assets/photo10.jpg",
+  "./assets/photo11.jpg",
+  "./assets/photo12.jpg",
+  "./assets/photo13.jpg",
+  "./assets/photo14.jpg",
+  "./assets/photo15.jpg",
+  "./assets/photo16.jpg",
+  "./assets/photo17.jpg",
+  "./assets/photo18.jpg",
+  "./assets/photo19.jpg",
+  "./assets/photo20.jpg",
+  "./assets/photo21.jpg",
+  "./assets/photo22.jpg",
+  "./assets/photo23.jpg",
+  "./assets/photo24.jpg",
+  "./assets/photo25.jpg"
+];
+
+
+let currentPuzzle = 0;
+let tiles = [];
+let firstTile = null;
+let time = 60;
+let startTime;
+let timer;
+
+// DOM
+const puzzle = document.getElementById("puzzle");
+const msg = document.getElementById("message");
+const final = document.getElementById("final");
+const bg = document.getElementById("bg");
+const magic = document.getElementById("magic");
+const timerEl = document.getElementById("time");
+
+bg.play();
+
+// ✅ Start first puzzle
+startPuzzle();
+
+function startPuzzle() {
+  puzzle.innerHTML = "";
+  tiles = [];
+  firstTile = null;
+  time = 60;
+  timerEl.textContent = time;
+  startTime = Date.now();
+
+  // Random positions
+  let order = [...Array(9).keys()].sort(() => Math.random() - 0.5);
+
+  order.forEach((i) => {
+    const tile = document.createElement("div");
+    tile.className = "tile";
+    tile.style.backgroundImage = `url(${images[currentPuzzle]})`;
+    tile.style.backgroundPosition = `${-(i % 3) * 100}px ${-Math.floor(i / 3) * 100}px`;
+    tile.dataset.pos = i;
+    tile.onclick = () => selectTile(tile);
+    tiles.push(tile);
+    puzzle.appendChild(tile);
+  });
+
+  clearInterval(timer);
+  timer = setInterval(handleTimer, 1000);
+}
+
+function handleTimer() {
+  time--;
+  timerEl.textContent = time;
+  if (time <= 0) {
+    clearInterval(timer);
+    sendEmailStatus("FAILED", "Time Up");
+    alert("Time Up 😢 Next Puzzle!");
+    nextPuzzle();
+  }
+}
+
+function selectTile(tile) {
+  if (!firstTile) {
+    firstTile = tile;
+    tile.style.border = "3px solid #e91e63";
+  } else {
+    swap(firstTile, tile);
+    firstTile.style.border = "2px solid #ddd";
+    firstTile = null;
+    checkWin();
+  }
+}
+
+function swap(a, b) {
+  let tmp = a.dataset.pos;
+  a.dataset.pos = b.dataset.pos;
+  b.dataset.pos = tmp;
+
+  let ap = a.style.backgroundPosition;
+  a.style.backgroundPosition = b.style.backgroundPosition;
+  b.style.backgroundPosition = ap;
+}
+
+function checkWin() {
+  const correct = tiles.every((t, idx) => Number(t.dataset.pos) === idx);
+  if (correct) {
+    clearInterval(timer);
+    magic.play();
+    let taken = Math.floor((Date.now() - startTime) / 1000);
+    sendEmailStatus("COMPLETED", `${taken} seconds`);
+    nextPuzzle();
+  }
+}
+
+function nextPuzzle() {
+  currentPuzzle++;
+  if (currentPuzzle < images.length) {
+    setTimeout(startPuzzle, 1000);
+  } else {
+    puzzle.style.display = "none";
+    msg.style.display = "none";
+    final.style.display = "block";
+  }
+}
+
+function sendEmailStatus(status, time) {
+  emailjs.send("service_z3i68xs", "template_smf2zea", {
+    puzzle_status: status,
+    puzzle_time: time,
+    email:"t.priyatharshini123@gmail.com"
+  });
+}
+</script>
+
+</body>
+</html>
